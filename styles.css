@@ -1,0 +1,162 @@
+/* ==========================================================================
+   WILDFLARE: Wildfire & Environmental Risk Intelligence Hub
+   UI Theme: Modern Dark Cyan Glassmorphism (Responsive Desktop/Tablet/Mobile)
+   ========================================================================== */
+
+:root {
+  --bg-deep: #040b11;
+  --bg-card: rgba(9, 23, 36, 0.72);
+  --cyan-glow: rgba(34, 211, 238, 0.35);
+}
+
+/* Subtle architectural grid background */
+.bg-grid-pattern {
+  background-size: 48px 48px;
+  background-image: 
+    linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+}
+
+/* Hero atmospheric backdrop */
+.hero-backdrop {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 35%, rgba(14, 165, 233, 0.14), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(34, 211, 238, 0.10), transparent 65%),
+    linear-gradient(180deg, rgba(4, 11, 17, 0.4) 0%, rgba(4, 11, 17, 0.98) 100%);
+}
+
+/* Glassmorphism Card */
+.glass-card {
+  background: linear-gradient(
+    145deg,
+    rgba(11, 27, 43, 0.85) 0%,
+    rgba(6, 16, 26, 0.92) 100%
+  );
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Custom Range Sliders (Touch-friendly for Mobile & iPad) */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 7px;
+  background: #1e293b;
+  border-radius: 999px;
+  outline: none;
+  touch-action: pan-y;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #22d3ee;
+  border: 2.5px solid #040b11;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.85);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover,
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.18);
+}
+
+/* Dark Tactical Filter for OpenStreetMap Tiles (100% Free, Zero API Key) */
+.dark-tactical-tiles {
+  filter: invert(100%) hue-rotate(190deg) brightness(92%) contrast(92%) saturate(135%);
+}
+
+/* Leaflet Dark Popup & Controls Styling */
+.leaflet-container {
+  background: #040b11 !important;
+  font-family: "IBM Plex Sans Thai", sans-serif !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(7, 19, 30, 0.96) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  border-radius: 16px !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(12px);
+}
+
+.leaflet-popup-tip {
+  background: rgba(7, 19, 30, 0.96) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: rgba(9, 23, 36, 0.92) !important;
+  color: #22d3ee !important;
+  border-color: rgba(34, 211, 238, 0.25) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: rgba(15, 35, 55, 0.96) !important;
+  color: #ffffff !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(4, 11, 17, 0.75) !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #38bdf8 !important;
+}
+
+/* Pulsing Hotspot Marker on Map */
+.hotspot-marker {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+.hotspot-marker-core {
+  width: 12px;
+  height: 12px;
+  background: #f97316;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  box-shadow: 0 0 12px #ef4444;
+}
+
+.hotspot-marker-pulse {
+  width: 26px;
+  height: 26px;
+  background: rgba(239, 68, 68, 0.45);
+  border-radius: 50%;
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  animation: hotspotPulse 1.8s infinite ease-out;
+}
+
+@keyframes hotspotPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+/* Selected Pin Marker */
+.selected-node-pin {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #22d3ee;
+  border: 3px solid #040b11;
+  box-shadow: 0 0 0 2px #22d3ee, 0 0 20px rgba(34, 211, 238, 0.9);
+}

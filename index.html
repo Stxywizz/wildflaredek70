@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>WILDFLARE — Wildfire &amp; Environmental Risk Intelligence Hub</title>
+  <meta name="description" content="WILDFLARE: ระบบวิเคราะห์ความเสี่ยงไฟป่าและเฝ้าระวังมลพิษทางอากาศเชิงวิศวกรรมสิ่งแวดล้อมแบบ Fact-based" />
+
+  <!-- Google Fonts: Kanit, IBM Plex Sans Thai, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"IBM Plex Sans Thai"', 'sans-serif'],
+            display: ['"Kanit"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet.js CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="bg-[#040b11] text-slate-100 font-sans antialiased selection:bg-cyan-400 selection:text-slate-950 overflow-x-hidden">
+
+  <!-- Ambient Background Glows -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -top-40 left-1/4 w-[450px] sm:w-[700px] h-[450px] sm:h-[700px] bg-cyan-500/10 rounded-full blur-[130px]"></div>
+    <div class="absolute top-60 right-10 w-[350px] sm:w-[550px] h-[350px] sm:h-[550px] bg-sky-500/10 rounded-full blur-[120px]"></div>
+    <div class="bg-grid-pattern absolute inset-0 opacity-25"></div>
+  </div>
+
+  <!-- ================= NAVBAR (Responsive Mobile / Tablet / Desktop) ================= -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-[#040b11]/80 border-b border-cyan-500/15">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group shrink-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-400/25 to-sky-500/10 border border-cyan-400/40 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.25)] group-hover:border-cyan-300 transition-all">
+          <i data-lucide="flame" class="w-5 h-5 text-cyan-400"></i>
+        </div>
+        <div>
+          <div class="font-display font-bold text-base sm:text-lg tracking-wider text-white flex items-center gap-2">
+            <span>WILDFLARE</span>
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">HUB</span>
+          </div>
+          <div class="text-[9px] sm:text-[10px] font-mono tracking-[0.16em] text-slate-400 uppercase whitespace-nowrap">
+            ENVIRONMENTAL RISK INTELLIGENCE
+          </div>
+        </div>
+      </a>
+
+      <!-- Desktop & Tablet Navigation -->
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-300">
+        <a href="#dashboard-section" class="hover:text-cyan-400 transition-colors whitespace-nowrap">แผนที่จุดความร้อน</a>
+        <a href="#telemetry-section" class="hover:text-cyan-400 transition-colors whitespace-nowrap">พารามิเตอร์สิ่งแวดล้อม</a>
+        <a href="#simulator-section" class="hover:text-cyan-400 transition-colors whitespace-nowrap">คำนวณความเสี่ยง</a>
+        <a href="#emergency-section" class="hover:text-cyan-400 transition-colors whitespace-nowrap">ศูนย์ฉุกเฉิน</a>
+        <a href="#credits-section" class="hover:text-cyan-400 transition-colors whitespace-nowrap">ผู้จัดทำโครงงาน</a>
+      </nav>
+
+      <!-- Right Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button
+          id="btn-locate-me"
+          class="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full font-display font-medium text-xs sm:text-sm text-slate-950 bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-400 hover:brightness-110 transition-all shadow-[0_0_22px_rgba(34,211,238,0.4)] active:scale-95 whitespace-nowrap"
+        >
+          <i data-lucide="locate-fixed" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          <span>ดึงพิกัดปัจจุบัน</span>
+        </button>
+
+        <!-- Mobile / Tablet Menu Button -->
+        <button
+          id="btn-mobile-menu"
+          aria-label="เปิดเมนูนำทาง"
+          class="lg:hidden p-2 rounded-xl bg-slate-900/90 border border-slate-700 text-slate-200 hover:border-cyan-400/50 transition-all"
+        >
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile & Tablet Dropdown Menu -->
+    <div id="mobile-menu-panel" class="hidden lg:hidden border-t border-slate-800/90 bg-[#06111b]/95 backdrop-blur-xl px-4 py-4 space-y-2 text-sm">
+      <a href="#dashboard-section" class="mobile-nav-link block px-3 py-2 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-300">🗺️ แผนที่จุดความร้อนและโซนความเสี่ยง</a>
+      <a href="#simulator-section" class="mobile-nav-link block px-3 py-2 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-300">🧮 อัลกอริทึมคำนวณและจำลองความเสี่ยง</a>
+      <a href="#telemetry-section" class="mobile-nav-link block px-3 py-2 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-300">🌡️ แผงพารามิเตอร์อุตุนิยมวิทยา</a>
+      <a href="#emergency-section" class="mobile-nav-link block px-3 py-2 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-300">🚨 ศูนย์พิกัดฉุกเฉินและสายด่วน 1362</a>
+      <a href="#credits-section" class="mobile-nav-link block px-3 py-2 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-300">🎓 คณะผู้จัดทำและอาจารย์ที่ปรึกษา</a>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION (Orca Inspired Modern UI) ================= -->
+  <section class="relative z-10 pt-8 pb-12 sm:pt-12 sm:pb-16 lg:pt-16 lg:pb-20 border-b border-cyan-500/10 hero-backdrop">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+        
+        <!-- Left Column: Hero Title & CTAs -->
+        <div class="lg:col-span-7 space-y-5 sm:space-y-6 text-left">
+          <!-- Status Pill Badge -->
+          <div class="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-cyan-950/70 border border-cyan-400/30 backdrop-blur-md">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span class="w-2 h-2 rounded-full bg-cyan-400 -ml-4"></span>
+            <span class="text-[11px] sm:text-xs font-medium tracking-wide text-cyan-300 whitespace-nowrap">
+              FACT-BASED ENGINEERING • วิเคราะห์จากข้อมูลจริงเรียลไทม์
+            </span>
+          </div>
+
+          <!-- Main Headline (Kept in clean, coherent lines) -->
+          <h1 class="font-display font-bold text-3xl sm:text-5xl lg:text-[54px] leading-[1.2] tracking-tight text-white">
+            <span class="block">ระบบเฝ้าระวังและวิเคราะห์ไฟป่า</span>
+            <span class="block mt-1">
+              เริ่มต้นที่ <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-400 drop-shadow-[0_0_25px_rgba(34,211,238,0.35)]">WILDFLARE</span>
+            </span>
+          </h1>
+
+          <!-- Subtitle with coherent phrases grouped together -->
+          <div class="text-slate-300/95 text-sm sm:text-base lg:text-lg leading-relaxed space-y-1">
+            <p class="sm:whitespace-nowrap">แพลตฟอร์มคำนวณดัชนีความเสี่ยงไฟป่าเชิงวิศวกรรมสิ่งแวดล้อม (0–100%)</p>
+            <p class="sm:whitespace-nowrap">ประมวลผลจากอุณหภูมิ ความชื้นสัมพัทธ์ ความเร็วลม และค่าฝุ่น PM2.5 แบบเรียลไทม์</p>
+            <p class="text-cyan-300/90 text-xs sm:text-sm font-medium">คำนวณด้วยสมการทางกายภาพโดยตรง ไม่ใช้แบบสอบถามประเมินความรู้สึก</p>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
+            <a
+              href="#dashboard-section"
+              class="inline-flex items-center gap-2.5 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full font-display font-semibold text-xs sm:text-sm text-slate-950 bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-400 hover:brightness-110 transition-all shadow-[0_0_28px_rgba(34,211,238,0.45)] whitespace-nowrap"
+            >
+              <i data-lucide="radar" class="w-4 h-4"></i>
+              <span>เปิดแผนที่วิเคราะห์ความเสี่ยง</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+
+            <button
+              id="btn-open-formula-modal"
+              class="inline-flex items-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 rounded-full font-display font-medium text-xs sm:text-sm text-slate-200 bg-slate-900/75 hover:bg-slate-800/90 border border-cyan-500/25 hover:border-cyan-400/50 backdrop-blur-md transition-all whitespace-nowrap"
+            >
+              <i data-lucide="function-square" class="w-4 h-4 text-cyan-400"></i>
+              <span>ดูสมการคำนวณ</span>
+            </button>
+          </div>
+
+          <!-- Feature Checkmarks -->
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2 text-xs sm:text-sm text-slate-300/90">
+            <div class="flex items-center gap-1.5 whitespace-nowrap">
+              <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i>
+              <span>ข้อมูลสภาพอากาศจริง (Open-Meteo)</span>
+            </div>
+            <div class="flex items-center gap-1.5 whitespace-nowrap">
+              <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i>
+              <span>รองรับมือถือ แท็บเล็ต และ iPad</span>
+            </div>
+            <div class="flex items-center gap-1.5 whitespace-nowrap">
+              <i data-lucide="check" class="w-4 h-4 text-cyan-400"></i>
+              <span>พิกัด GPS แจ้งเหตุสายด่วน 1362</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Floating Glassmorphic Status Card -->
+        <div class="lg:col-span-5">
+          <div class="glass-card rounded-3xl p-5 sm:p-7 border border-cyan-400/25 shadow-[0_20px_60px_rgba(0,0,0,0.65)] relative overflow-hidden">
+            <div class="absolute -right-12 -top-12 w-40 h-40 bg-cyan-400/15 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="flex items-start justify-between gap-3 mb-5">
+              <div>
+                <div class="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] text-cyan-300/80 mb-1">
+                  WILDFLARE ACTIVE STATION
+                </div>
+                <h2 id="hero-station-name" class="font-display font-bold text-xl sm:text-2xl text-white">
+                  ดอยสุเทพ-ปุย (เชียงใหม่)
+                </h2>
+              </div>
+              <span id="hero-api-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>ออนไลน์</span>
+              </span>
+            </div>
+
+            <!-- Key Status Rows -->
+            <div class="space-y-3 text-xs sm:text-sm border-t border-b border-slate-700/50 py-4 my-2">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 whitespace-nowrap">ดัชนีความเสี่ยงไฟป่า (WRI)</span>
+                <span id="hero-risk-score" class="font-mono font-bold text-base sm:text-lg text-amber-400 whitespace-nowrap">68.4% (เฝ้าระวัง)</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 whitespace-nowrap">อุณหภูมิ / ความชื้นสัมพัทธ์</span>
+                <span id="hero-temp-rh" class="font-mono font-semibold text-white whitespace-nowrap">34.2 °C / 32% RH</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 whitespace-nowrap">ความเข้มข้นฝุ่น PM2.5</span>
+                <span id="hero-pm25" class="font-mono font-semibold text-white whitespace-nowrap">58.5 µg/m³</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 whitespace-nowrap">พิกัดภูมิศาสตร์ (GPS)</span>
+                <span id="hero-coords" class="font-mono text-xs text-cyan-300 whitespace-nowrap">18.8048°N, 98.9215°E</span>
+              </div>
+            </div>
+
+            <div class="pt-3 flex items-center justify-between text-xs text-slate-400">
+              <span class="whitespace-nowrap">อัปเดตล่าสุด: <span id="hero-updated-time" class="font-mono text-slate-300">เมื่อสักครู่</span></span>
+              <a href="#simulator-section" class="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-1 whitespace-nowrap">
+                <span>ทดลองปรับตัวแปร</span>
+                <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MAIN COMMAND HUB SECTION ================= -->
+  <main id="dashboard-section" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-10 sm:space-y-12">
+
+    <!-- Section Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950/70 border border-cyan-400/25 text-[11px] font-mono uppercase tracking-[0.16em] text-cyan-300 mb-2.5">
+          INSIDE THE WILDFLARE HUB
+        </div>
+        <h2 class="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-white">
+          ศูนย์ควบคุมแผนที่จุดความร้อนและวิเคราะห์ความเสี่ยง
+        </h2>
+        <p class="text-slate-400 text-xs sm:text-sm lg:text-base mt-1">
+          แตะเลือกจุดใดก็ได้บนแผนที่ หรือเลือกสถานีป่าไม้ด้านล่าง เพื่อดึงค่าสภาพอากาศและคำนวณความเสี่ยงไฟป่าทันที
+        </p>
+      </div>
+
+      <!-- Data Mode Indicator & Refresh -->
+      <div class="flex items-center gap-2.5 self-start md:self-auto">
+        <div id="mode-indicator-pill" class="px-3.5 py-2 rounded-full bg-slate-900/90 border border-cyan-500/30 text-xs font-mono flex items-center gap-2">
+          <span id="mode-dot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+          <span id="mode-text" class="text-slate-200 whitespace-nowrap">โหมด: ข้อมูลจริงเรียลไทม์ (Live API)</span>
+        </div>
+        <button
+          id="btn-refresh-api"
+          title="รีเฟรชข้อมูลสภาพอากาศ"
+          class="p-2.5 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-slate-700 hover:border-cyan-400/50 text-cyan-400 transition-all shrink-0"
+        >
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Preset Station Selector Bar -->
+    <div class="glass-card rounded-2xl p-4 border border-slate-800/80">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+        <span class="text-xs font-mono uppercase tracking-wider text-slate-300 flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="compass" class="w-4 h-4 text-cyan-400"></i>
+          <span>เลือกสถานีเฝ้าระวังพื้นที่ป่าไม้สำคัญ:</span>
+        </span>
+        <span class="text-xs text-cyan-300/80">
+          💡 สามารถแตะเลือกพิกัดอื่นๆ บนแผนที่ได้อย่างอิสระ
+        </span>
+      </div>
+      <div id="station-presets" class="flex flex-wrap gap-2">
+        <!-- Populated by app.js -->
+      </div>
+    </div>
+
+    <!-- ================= GRID: MAP + RISK CALCULATION CORE ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- 1. INTERACTIVE MAP PANEL (7 Columns on Desktop, Full width on Mobile/iPad) -->
+      <div class="lg:col-span-7 glass-card rounded-3xl border border-cyan-500/20 overflow-hidden shadow-2xl flex flex-col">
+        <!-- Map Top Bar -->
+        <div class="p-4 sm:px-6 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-3 bg-slate-950/60">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center shrink-0">
+              <i data-lucide="map" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <div>
+              <h3 class="font-display font-semibold text-sm sm:text-base text-white leading-tight">
+                แผนที่ดิจิทัลแสดงจุดความร้อนและโซนความเสี่ยง
+              </h3>
+              <p class="text-[11px] sm:text-xs text-slate-400">
+                รองรับทั้งภาพถ่ายดาวเทียมและแผนที่ยุทธศาสตร์มืด (ไม่ต้องใช้ API Key)
+              </p>
+            </div>
+          </div>
+
+          <!-- Map Layer & Overlay Controls -->
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
+            <button
+              id="btn-toggle-hotspots"
+              class="px-3 py-1.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 hover:bg-rose-500/25 transition-all flex items-center gap-1.5 font-medium whitespace-nowrap"
+            >
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              <span>จุดความร้อน (<span id="hotspot-count-badge">9</span>)</span>
+            </button>
+            <button
+              id="btn-toggle-zones"
+              class="px-3 py-1.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 hover:bg-cyan-500/25 transition-all flex items-center gap-1.5 font-medium whitespace-nowrap"
+            >
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <span>โซนสีความเสี่ยง</span>
+            </button>
+            <button
+              id="btn-toggle-satellite"
+              class="px-3 py-1.5 rounded-full bg-slate-800 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 transition-all flex items-center gap-1.5 font-medium whitespace-nowrap"
+            >
+              <i data-lucide="satellite" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span id="map-style-label">สลับเป็นแผนที่มืด</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Leaflet Map Container -->
+        <div class="relative w-full h-[380px] sm:h-[460px] lg:h-[520px] bg-slate-950">
+          <div id="map" class="w-full h-full z-10"></div>
+
+          <!-- Floating Map Legend -->
+          <div class="absolute bottom-3 left-3 z-[400] glass-card rounded-2xl p-3 border border-slate-700/80 text-[11px] sm:text-xs space-y-1.5 shadow-xl max-w-[230px]">
+            <div class="font-display font-semibold text-slate-200 flex items-center gap-1.5 whitespace-nowrap">
+              <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>ระดับโซนสีความเสี่ยง (WRI)</span>
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 whitespace-nowrap">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] shrink-0"></span>
+                <span class="text-slate-300">0–39% : ปลอดภัย (สีเขียว)</span>
+              </div>
+              <div class="flex items-center gap-2 whitespace-nowrap">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24] shrink-0"></span>
+                <span class="text-slate-300">40–69% : เฝ้าระวัง (สีเหลือง)</span>
+              </div>
+              <div class="flex items-center gap-2 whitespace-nowrap">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e] shrink-0"></span>
+                <span class="text-slate-300">70–100% : วิกฤตไฟป่า (สีแดง)</span>
+              </div>
+              <div class="flex items-center gap-2 pt-1 border-t border-slate-800 whitespace-nowrap">
+                <span class="w-2.5 h-2.5 rounded-full bg-orange-500 border border-white animate-pulse shrink-0"></span>
+                <span class="text-orange-300">พิกัดจุดความร้อน (Hotspot)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Footer Status Bar -->
+        <div class="px-4 sm:px-5 py-3 bg-slate-950/85 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 font-mono">พิกัดที่เลือก:</span>
+            <span id="map-footer-location" class="text-slate-200 font-medium">ดอยสุเทพ-ปุย (เชียงใหม่)</span>
+          </div>
+          <div class="font-mono text-slate-300" id="map-footer-gps">
+            LAT: 18.804800 | LNG: 98.921500
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. RISK CALCULATION CORE & SIMULATOR (5 Columns) -->
+      <div id="simulator-section" class="lg:col-span-5 space-y-6">
+
+        <!-- Card A: Wildfire Risk Calculation Core -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 border border-cyan-500/20 shadow-2xl relative overflow-hidden">
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center shrink-0">
+                <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i>
+              </div>
+              <div>
+                <h3 class="font-display font-semibold text-base text-white">
+                  Risk Calculation Core
+                </h3>
+                <p class="text-xs text-slate-400 whitespace-nowrap">
+                  อัลกอริทึมคำนวณความเสี่ยงไฟป่า (0–100%)
+                </p>
+              </div>
+            </div>
+            <span id="risk-badge-pill" class="px-3 py-1 rounded-full text-xs font-display font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/40 whitespace-nowrap">
+              เฝ้าระวังพิเศษ
+            </span>
+          </div>
+
+          <!-- Circular Gauge & Big Score Display -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center py-2">
+            <!-- SVG Radial Gauge -->
+            <div class="sm:col-span-5 flex flex-col items-center justify-center relative">
+              <svg class="w-36 h-36 sm:w-40 sm:h-40 -rotate-90 transform" viewBox="0 0 120 120">
+                <circle
+                  cx="60" cy="60" r="50"
+                  stroke="rgba(30, 41, 59, 0.9)"
+                  stroke-width="10"
+                  fill="transparent"
+                />
+                <circle
+                  id="risk-gauge-circle"
+                  cx="60" cy="60" r="50"
+                  stroke="#fbbf24"
+                  stroke-width="10"
+                  stroke-dasharray="314.16"
+                  stroke-dashoffset="100"
+                  stroke-linecap="round"
+                  fill="transparent"
+                  class="transition-all duration-500 ease-out"
+                />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">RISK INDEX</span>
+                <div class="flex items-baseline">
+                  <span id="risk-score-number" class="font-mono font-bold text-3xl sm:text-4xl text-white">68.4</span>
+                  <span class="font-mono text-sm text-cyan-400 ml-0.5">%</span>
+                </div>
+                <span id="risk-vpd-tag" class="text-[11px] font-mono text-slate-400 mt-0.5">VPD: 3.65 kPa</span>
+              </div>
+            </div>
+
+            <!-- Factor Contributions Breakdown -->
+            <div class="sm:col-span-7 space-y-3 text-xs">
+              <div class="text-slate-300 font-medium mb-1 flex items-center justify-between">
+                <span class="whitespace-nowrap">สัดส่วนคะแนนแต่ละตัวแปร:</span>
+                <span class="font-mono text-[11px] text-cyan-400">WRI = Σ(Wi×Ii)</span>
+              </div>
+
+              <!-- Humidity Deficit Factor (Weight 40%) -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300 whitespace-nowrap">1. ความแห้งแล้งอากาศ (RH 40%)</span>
+                  <span id="factor-rh-score" class="font-mono text-cyan-300 whitespace-nowrap">28.0 / 40</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div id="factor-rh-bar" class="h-full bg-gradient-to-r from-cyan-400 to-sky-500 transition-all duration-300" style="width: 70%"></div>
+                </div>
+              </div>
+
+              <!-- Temperature Factor (Weight 30%) -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300 whitespace-nowrap">2. ความร้อนสะสม (Temp 30%)</span>
+                  <span id="factor-temp-score" class="font-mono text-amber-300 whitespace-nowrap">21.5 / 30</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div id="factor-temp-bar" class="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-300" style="width: 72%"></div>
+                </div>
+              </div>
+
+              <!-- Wind Spread Factor (Weight 20%) -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300 whitespace-nowrap">3. แรงลมหนุนไฟลาม (Wind 20%)</span>
+                  <span id="factor-wind-score" class="font-mono text-emerald-300 whitespace-nowrap">11.2 / 20</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div id="factor-wind-bar" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-300" style="width: 56%"></div>
+                </div>
+              </div>
+
+              <!-- PM2.5 Biomass Smoke Factor (Weight 10%) -->
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-300 whitespace-nowrap">4. ฝุ่นควันชีวมวล (PM2.5 10%)</span>
+                  <span id="factor-pm-score" class="font-mono text-rose-300 whitespace-nowrap">7.7 / 10</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div id="factor-pm-bar" class="h-full bg-gradient-to-r from-rose-400 to-pink-500 transition-all duration-300" style="width: 77%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Engineering Interpretation Box -->
+          <div id="risk-interpretation-box" class="mt-4 p-3.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-xs text-slate-300 leading-relaxed">
+            กำลังประมวลผลข้อมูลสภาพแวดล้อม...
+          </div>
+        </div>
+
+        <!-- Card B: Interactive What-If Engineering Simulator -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 border border-cyan-500/20 shadow-2xl">
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center shrink-0">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4 text-cyan-400"></i>
+              </div>
+              <div>
+                <h3 class="font-display font-semibold text-base text-white">
+                  จำลองปรับค่าตัวแปร (Simulation Lab)
+                </h3>
+                <p class="text-xs text-slate-400">
+                  เลื่อนแถบเพื่อดูการเปลี่ยนแปลงของความเสี่ยงทันที
+                </p>
+              </div>
+            </div>
+
+            <button
+              id="btn-reset-live"
+              class="px-3 py-1.5 rounded-full text-xs font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 hover:bg-cyan-500/25 transition-all whitespace-nowrap shrink-0"
+            >
+              คืนค่าอากาศจริง
+            </button>
+          </div>
+
+          <!-- Quick Simulation Scenarios -->
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            <button data-scenario="crisis" class="scenario-btn px-2.5 py-1.5 rounded-lg text-[11px] bg-rose-500/15 text-rose-300 border border-rose-500/30 hover:bg-rose-500/25 transition-all whitespace-nowrap">
+              🔥 ฤดูแล้งวิกฤต (RH 18%, 41°C)
+            </button>
+            <button data-scenario="windy" class="scenario-btn px-2.5 py-1.5 rounded-lg text-[11px] bg-amber-500/15 text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all whitespace-nowrap">
+              💨 ลมกรรโชกแรง (38 km/h)
+            </button>
+            <button data-scenario="rainy" class="scenario-btn px-2.5 py-1.5 rounded-lg text-[11px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all whitespace-nowrap">
+              🌧️ หลังฝนตก (RH 82%, 25°C)
+            </button>
+          </div>
+
+          <!-- Sliders -->
+          <div class="space-y-4 text-xs">
+            <!-- Temp Slider -->
+            <div>
+              <div class="flex justify-between mb-1.5">
+                <label for="slider-temp" class="text-slate-300 font-medium flex items-center gap-1.5">
+                  <i data-lucide="thermometer" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>อุณหภูมิอากาศ (Temperature)</span>
+                </label>
+                <span id="slider-temp-val" class="font-mono font-bold text-amber-300">34.2 °C</span>
+              </div>
+              <input id="slider-temp" type="range" min="10" max="46" step="0.5" value="34.2" class="w-full" />
+            </div>
+
+            <!-- RH Slider -->
+            <div>
+              <div class="flex justify-between mb-1.5">
+                <label for="slider-rh" class="text-slate-300 font-medium flex items-center gap-1.5">
+                  <i data-lucide="droplets" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span>ความชื้นสัมพัทธ์ (RH %)</span>
+                </label>
+                <span id="slider-rh-val" class="font-mono font-bold text-cyan-300">32 %</span>
+              </div>
+              <input id="slider-rh" type="range" min="10" max="100" step="1" value="32" class="w-full" />
+            </div>
+
+            <!-- Wind Slider -->
+            <div>
+              <div class="flex justify-between mb-1.5">
+                <label for="slider-wind" class="text-slate-300 font-medium flex items-center gap-1.5">
+                  <i data-lucide="wind" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>ความเร็วลม (Wind Speed)</span>
+                </label>
+                <span id="slider-wind-val" class="font-mono font-bold text-emerald-300">18.5 km/h</span>
+              </div>
+              <input id="slider-wind" type="range" min="0" max="60" step="0.5" value="18.5" class="w-full" />
+            </div>
+
+            <!-- PM2.5 Slider -->
+            <div>
+              <div class="flex justify-between mb-1.5">
+                <label for="slider-pm25" class="text-slate-300 font-medium flex items-center gap-1.5">
+                  <i data-lucide="cloud-fog" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>ความเข้มข้นฝุ่นละออง PM2.5</span>
+                </label>
+                <span id="slider-pm25-val" class="font-mono font-bold text-rose-300">58.5 µg/m³</span>
+              </div>
+              <input id="slider-pm25" type="range" min="5" max="250" step="1" value="58.5" class="w-full" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= 3. ENVIRONMENTAL TELEMETRY PANEL (4 Cards) ================= -->
+    <section id="telemetry-section" class="space-y-4 pt-2">
+      <div>
+        <h3 class="font-display font-bold text-xl sm:text-2xl text-white flex items-center gap-2">
+          <i data-lucide="activity" class="w-5 h-5 text-cyan-400 shrink-0"></i>
+          <span>แผงข้อมูลอุตุนิยมวิทยาและสิ่งแวดล้อม (Environmental Panel)</span>
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          แสดงค่าพารามิเตอร์แบบเรียลไทม์ของพิกัดที่เลือก เพื่อใช้เป็นข้อมูลตั้งต้นในการคำนวณความเสี่ยงไฟป่า
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <!-- Card 1: Temperature -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-cyan-500/30 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400">อุณหภูมิอากาศ (T)</span>
+            <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center">
+              <i data-lucide="thermometer-sun" class="w-4 h-4 text-amber-400"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="card-temp-value" class="font-mono font-bold text-3xl text-white">34.2</span>
+            <span class="font-mono text-sm text-amber-400">°C</span>
+          </div>
+          <p id="card-temp-status" class="text-xs text-slate-300 mt-2">
+            เร่งการระเหยน้ำในเชื้อเพลิงธรรมชาติ
+          </p>
+        </div>
+
+        <!-- Card 2: Relative Humidity (RH %) -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-cyan-500/30 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400">ความชื้นสัมพัทธ์ (RH)</span>
+            <div class="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center">
+              <i data-lucide="droplets" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="card-rh-value" class="font-mono font-bold text-3xl text-white">32</span>
+            <span class="font-mono text-sm text-cyan-400">%</span>
+          </div>
+          <p id="card-rh-status" class="text-xs text-slate-300 mt-2">
+            ต่ำกว่าเกณฑ์ปลอดภัย เชื้อเพลิงแห้งติดไฟง่าย
+          </p>
+        </div>
+
+        <!-- Card 3: Wind Speed -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-cyan-500/30 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400">ความเร็วลม (WIND)</span>
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center">
+              <i data-lucide="wind" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="card-wind-value" class="font-mono font-bold text-3xl text-white">18.5</span>
+            <span class="font-mono text-sm text-emerald-400">km/h</span>
+          </div>
+          <p id="card-wind-status" class="text-xs text-slate-300 mt-2">
+            เติมออกซิเจนและพัดพาแนวไฟให้ลุกลาม
+          </p>
+        </div>
+
+        <!-- Card 4: PM2.5 Concentration -->
+        <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-cyan-500/30 transition-all">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400">ค่าฝุ่นละออง (PM2.5)</span>
+            <div class="w-9 h-9 rounded-xl bg-rose-500/15 border border-rose-400/30 flex items-center justify-center">
+              <i data-lucide="cloud-fog" class="w-4 h-4 text-rose-400"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="card-pm25-value" class="font-mono font-bold text-3xl text-white">58.5</span>
+            <span class="font-mono text-sm text-rose-400">µg/m³</span>
+          </div>
+          <p id="card-pm25-status" class="text-xs text-amber-300 mt-2">
+            เริ่มมีผลกระทบต่อสุขภาพ (&gt;37.5 µg/m³)
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 4. EMERGENCY & ACTION CENTER ================= -->
+    <section id="emergency-section" class="pt-2">
+      <div class="glass-card rounded-3xl p-5 sm:p-8 border border-cyan-500/25 shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+
+          <!-- Left: Selected GPS Coordinate & Incident Dispatch Copy -->
+          <div class="lg:col-span-6 space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-mono">
+              <i data-lucide="siren" class="w-3.5 h-3.5"></i>
+              <span>EMERGENCY CENTER &amp; GPS DISPATCH</span>
+            </div>
+
+            <h3 class="font-display font-bold text-2xl sm:text-3xl text-white">
+              ศูนย์พิกัดแจ้งเหตุฉุกเฉินและสายด่วนพิทักษ์ป่า
+            </h3>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+              คลิกเลือกจุดเกิดเหตุบนแผนที่เพื่อดูพิกัด GPS (Latitude, Longitude) พร้อมคัดลอกรายงานส่งให้เจ้าหน้าที่ชุดเหยี่ยวไฟหรือสายด่วนกรมอุทยานฯ 1362 ได้ทันที
+            </p>
+
+            <!-- Coordinate Readout Box -->
+            <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5 font-mono text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 whitespace-nowrap">พื้นที่เฝ้าระวัง:</span>
+                <span id="emg-station-name" class="text-cyan-300 font-sans font-medium text-right">ดอยสุเทพ-ปุย (เชียงใหม่)</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 whitespace-nowrap">พิกัด GPS (Lat, Long):</span>
+                <span id="emg-decimal-coords" class="text-white font-semibold whitespace-nowrap">18.804800, 98.921500</span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-slate-400 whitespace-nowrap">พิกัดองศา-ลิปดา (DMS):</span>
+                <span id="emg-dms-coords" class="text-slate-300 whitespace-nowrap">18°48'17.3"N 98°55'17.4"E</span>
+              </div>
+            </div>
+
+            <!-- Copy Incident Report & Google Maps Buttons -->
+            <div class="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                id="btn-copy-report"
+                class="inline-flex items-center gap-2 px-5 sm:px-6 py-3 rounded-full font-display font-semibold text-xs sm:text-sm text-slate-950 bg-gradient-to-r from-cyan-300 via-cyan-400 to-sky-400 hover:brightness-110 transition-all shadow-[0_0_25px_rgba(34,211,238,0.35)] whitespace-nowrap"
+              >
+                <i data-lucide="copy" class="w-4 h-4"></i>
+                <span id="copy-btn-text">คัดลอกพิกัดแจ้งเหตุ</span>
+              </button>
+
+              <a
+                id="btn-open-gmaps"
+                href="https://www.google.com/maps?q=18.8048,98.9215"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-5 py-3 rounded-full font-display font-medium text-xs sm:text-sm text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-400/40 transition-all whitespace-nowrap"
+              >
+                <i data-lucide="external-link" class="w-4 h-4 text-cyan-400"></i>
+                <span>เปิดใน Google Maps</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right: Direct Emergency Hotline Cards -->
+          <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+            <!-- 1362 -->
+            <a href="tel:1362" class="p-4 sm:p-5 rounded-2xl bg-slate-900/85 hover:bg-slate-900 border border-rose-500/35 hover:border-rose-400 transition-all group">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-rose-500/20 text-rose-300">สายด่วนหลัก 24 ชม.</span>
+                <i data-lucide="phone-call" class="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform"></i>
+              </div>
+              <div class="font-mono font-bold text-2xl sm:text-3xl text-white group-hover:text-rose-300 transition-colors">1362</div>
+              <div class="font-display font-medium text-sm text-slate-200 mt-1">สายด่วนพิทักษ์ป่า (กรมอุทยานฯ)</div>
+              <p class="text-xs text-slate-400 mt-1">แจ้งเหตุไฟป่าและบุกรุกป่าไม้ทั่วประเทศ</p>
+            </a>
+
+            <!-- 1784 -->
+            <a href="tel:1784" class="p-4 sm:p-5 rounded-2xl bg-slate-900/85 hover:bg-slate-900 border border-amber-500/35 hover:border-amber-400 transition-all group">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-300">บรรเทาสาธารณภัย</span>
+                <i data-lucide="phone-call" class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform"></i>
+              </div>
+              <div class="font-mono font-bold text-2xl sm:text-3xl text-white group-hover:text-amber-300 transition-colors">1784</div>
+              <div class="font-display font-medium text-sm text-slate-200 mt-1">สายด่วน ปภ. (ภัยพิบัติ)</div>
+              <p class="text-xs text-slate-400 mt-1">ประสานงานป้องกันและระงับภัยไฟป่า-หมอกควัน</p>
+            </a>
+
+            <!-- 199 -->
+            <a href="tel:199" class="p-4 sm:p-5 rounded-2xl bg-slate-900/85 hover:bg-slate-900 border border-cyan-500/25 hover:border-cyan-400 transition-all group">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-cyan-500/20 text-cyan-300">ดับเพลิง-กู้ภัย</span>
+                <i data-lucide="phone-call" class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform"></i>
+              </div>
+              <div class="font-mono font-bold text-2xl sm:text-3xl text-white group-hover:text-cyan-300 transition-colors">199</div>
+              <div class="font-display font-medium text-sm text-slate-200 mt-1">ศูนย์วิทยุแจ้งเหตุดับเพลิง</div>
+              <p class="text-xs text-slate-400 mt-1">ประสานรถดับเพลิงเมื่อไฟลุกลามใกล้เขตชุมชน</p>
+            </a>
+
+            <!-- 1669 -->
+            <a href="tel:1669" class="p-4 sm:p-5 rounded-2xl bg-slate-900/85 hover:bg-slate-900 border border-emerald-500/25 hover:border-emerald-400 transition-all group">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-300">การแพทย์ฉุกเฉิน</span>
+                <i data-lucide="heart-pulse" class="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform"></i>
+              </div>
+              <div class="font-mono font-bold text-2xl sm:text-3xl text-white group-hover:text-emerald-300 transition-colors">1669</div>
+              <div class="font-display font-medium text-sm text-slate-200 mt-1">สถาบันการแพทย์ฉุกเฉิน (สพฉ.)</div>
+              <p class="text-xs text-slate-400 mt-1">ช่วยเหลือผู้ป่วยฉุกเฉินหรือสำลักควันไฟป่า</p>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 5. PROJECT CREDITS & ADVISOR SECTION (หน้าผู้จัดทำและที่ปรึกษา) ================= -->
+    <section id="credits-section" class="pt-4">
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-cyan-500/25 shadow-2xl relative overflow-hidden">
+        <div class="absolute -left-16 -bottom-16 w-52 h-52 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-800/80 pb-5">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-400/30 text-cyan-300 text-xs font-mono mb-2">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+              <span>PROJECT CREDITS &amp; DEVELOPMENT TEAM</span>
+            </div>
+            <h3 class="font-display font-bold text-2xl sm:text-3xl text-white">
+              คณะผู้จัดทำและที่ปรึกษาโครงงาน
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              โครงงานการพัฒนาเว็บแอปพลิเคชันวิเคราะห์ความเสี่ยงไฟป่าและสิ่งแวดล้อม (WILDFLARE)
+            </p>
+          </div>
+
+          <button
+            id="btn-edit-credits"
+            class="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-medium bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 transition-all whitespace-nowrap"
+          >
+            <i data-lucide="pen-line" class="w-3.5 h-3.5"></i>
+            <span>แก้ไขชื่อผู้จัดทำ / ที่ปรึกษา</span>
+          </button>
+        </div>
+
+        <!-- 3 Credit Cards: Developer, Advisor, School/Institution -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          
+          <!-- Developer Card -->
+          <div class="p-5 rounded-2xl bg-slate-900/75 border border-cyan-500/25 flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-400/25 to-sky-500/10 border border-cyan-400/40 flex items-center justify-center shrink-0">
+              <i data-lucide="user-check" class="w-6 h-6 text-cyan-400"></i>
+            </div>
+            <div class="space-y-1">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 block">ผู้จัดทำและพัฒนาโครงงาน</span>
+              <h4 id="credit-dev-name" class="font-display font-bold text-lg text-white">ระบุชื่อผู้จัดทำโครงงาน</h4>
+              <p id="credit-dev-role" class="text-xs text-slate-300">นักเรียนระดับชั้นมัธยมศึกษาตอนปลาย</p>
+              <p class="text-[11px] text-slate-400 pt-1">ออกแบบระบบ วิเคราะห์สมการความเสี่ยง และพัฒนาส่วนติดต่อผู้ใช้</p>
+            </div>
+          </div>
+
+          <!-- Advisor Card -->
+          <div class="p-5 rounded-2xl bg-slate-900/75 border border-sky-500/25 flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400/25 to-indigo-500/10 border border-sky-400/40 flex items-center justify-center shrink-0">
+              <i data-lucide="award" class="w-6 h-6 text-sky-400"></i>
+            </div>
+            <div class="space-y-1">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-sky-400 block">ครู / อาจารย์ที่ปรึกษาโครงงาน</span>
+              <h4 id="credit-advisor-name" class="font-display font-bold text-lg text-white">ระบุชื่ออาจารย์ที่ปรึกษา</h4>
+              <p id="credit-advisor-role" class="text-xs text-slate-300">อาจารย์ที่ปรึกษาโครงงานวิทยาศาสตร์และเทคโนโลยี</p>
+              <p class="text-[11px] text-slate-400 pt-1">ให้คำแนะนำหลักการทางวิชาการและการตรวจสอบความถูกต้องของข้อมูล</p>
+            </div>
+          </div>
+
+          <!-- Institution / School Card -->
+          <div class="p-5 rounded-2xl bg-slate-900/75 border border-teal-500/25 flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400/25 to-emerald-500/10 border border-teal-400/40 flex items-center justify-center shrink-0">
+              <i data-lucide="building-2" class="w-6 h-6 text-teal-400"></i>
+            </div>
+            <div class="space-y-1">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-teal-400 block">สถานศึกษาและแหล่งข้อมูล</span>
+              <h4 id="credit-school-name" class="font-display font-bold text-lg text-white">ระบุชื่อโรงเรียน / สถานศึกษา</h4>
+              <p id="credit-school-dept" class="text-xs text-slate-300">โครงงานเพื่อยื่นแฟ้มสะสมผลงาน (Portfolio)</p>
+              <p class="text-[11px] text-slate-400 pt-1">ข้อมูลอุตุนิยมวิทยาจาก Open-Meteo API และพิกัดแผนที่จาก OpenStreetMap / Esri</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= EDIT CREDITS MODAL ================= -->
+  <div id="credits-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+    <div class="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-cyan-400/30 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-display font-bold text-lg text-white flex items-center gap-2">
+          <i data-lucide="user-Check" class="w-5 h-5 text-cyan-400"></i>
+          <span>ตั้งค่าข้อมูลผู้จัดทำและอาจารย์ที่ปรึกษา</span>
+        </h3>
+        <button id="btn-close-credits-modal" class="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs sm:text-sm">
+        <div>
+          <label class="block text-slate-300 mb-1">ชื่อ-นามสกุล ผู้จัดทำโครงงาน</label>
+          <input id="input-dev-name" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น นายสมชาย ใจดี" />
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1">ระดับชั้น / ตำแหน่งผู้จัดทำ</label>
+          <input id="input-dev-role" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น นักเรียนชั้นมัธยมศึกษาปีที่ 6" />
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1">ชื่อ-นามสกุล ครู/อาจารย์ที่ปรึกษา</label>
+          <input id="input-advisor-name" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น อาจารย์วิชัย วิทยา" />
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1">ชื่อโรงเรียน / สถานศึกษา</label>
+          <input id="input-school-name" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น โรงเรียน..." />
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-2">
+        <button id="btn-save-credits" class="px-6 py-2.5 rounded-full font-display font-semibold text-xs sm:text-sm text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-all">
+          บันทึกข้อมูล
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ENGINEERING FORMULA MODAL ================= -->
+  <div id="formula-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+    <div class="glass-card rounded-3xl max-w-2xl w-full p-6 sm:p-8 border border-cyan-400/30 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="function-square" class="w-6 h-6 text-cyan-400 shrink-0"></i>
+          <h3 class="font-display font-bold text-lg sm:text-xl text-white">
+            สมการคำนวณดัชนีความเสี่ยงไฟป่า (WILDFLARE Core)
+          </h3>
+        </div>
+        <button id="btn-close-formula-modal" class="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p>
+          ระบบ <strong>WILDFLARE</strong> ออกแบบขึ้นตามหลักวิศวกรรมสิ่งแวดล้อมและอุตุนิยมวิทยาป่าไม้ โดยประยุกต์แนวคิดจากดัชนี <em>McArthur Forest Fire Danger Index (FFDI)</em> ร่วมกับการคำนวณค่าแรงดันไอพร่อง (Vapor Pressure Deficit: VPD) เพื่อประเมินโอกาสการติดไฟของเชื้อเพลิงธรรมชาติจากข้อมูลจริง:
+        </p>
+
+        <div class="p-4 rounded-2xl bg-slate-950 border border-cyan-500/25 font-mono text-xs sm:text-sm text-cyan-300 overflow-x-auto">
+          WRI (%) = (0.40 × I_RH) + (0.30 × I_T) + (0.20 × I_W) + (0.10 × I_PM)
+        </div>
+
+        <ul class="space-y-2.5">
+          <li>
+            <strong class="text-cyan-300">1. ดัชนีความชื้นสัมพัทธ์พร่อง (I_RH — น้ำหนัก 40%):</strong>
+            ความชื้นสัมพัทธ์เป็นปัจจัยหลักที่ควบคุมปริมาณความชื้นในเศษใบไม้แห้ง เมื่อ RH ต่ำกว่า 40% เชื้อเพลิงจะสูญเสียน้ำอย่างรวดเร็วและพร้อมติดไฟทันที
+          </li>
+          <li>
+            <strong class="text-amber-300">2. ดัชนีอุณหภูมิผิวพื้น (I_T — น้ำหนัก 30%):</strong>
+            อุณหภูมิที่สูงขึ้นจะยกระดับอุณหภูมิของเชื้อเพลิงให้เข้าใกล้จุดติดไฟ และเพิ่มค่า <em>Vapor Pressure Deficit (VPD)</em> ตามสมการของ Tetens:
+            <div class="font-mono text-xs text-slate-400 mt-1">
+              es = 0.61078 × exp((17.27 × T) / (T + 237.3)) kPa , VPD = es × (1 - RH/100)
+            </div>
+          </li>
+          <li>
+            <strong class="text-emerald-300">3. ดัชนีความเร็วลม (I_W — น้ำหนัก 20%):</strong>
+            ความเร็วลมเพิ่มอัตราการจ่ายออกซิเจนแก่กองไฟ โน้มเปลวไฟให้แนบไปกับเชื้อเพลิงเบื้องหน้า และพัดพาลูกไฟให้ลอยข้ามแนวกันไฟ (Spotting)
+          </li>
+          <li>
+            <strong class="text-rose-300">4. ดัชนีฝุ่นควันชีวมวล (I_PM2.5 — น้ำหนัก 10%):</strong>
+            ความเข้มข้นของฝุ่นละอองขนาดเล็กไม่เกิน 2.5 ไมครอน ใช้เป็นตัวชี้วัดสะท้อนการเผาไหม้ชีวมวลที่กำลังเกิดขึ้นในบริเวณใกล้เคียง
+          </li>
+        </ul>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button id="btn-close-formula-modal-bottom" class="px-6 py-2.5 rounded-full font-display font-medium text-sm text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-all">
+          เข้าใจแล้ว
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="relative z-10 border-t border-slate-800/80 bg-[#03080d] py-8 mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 text-center sm:text-left">
+      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+        <span class="font-display font-bold text-cyan-400">WILDFLARE HUB</span>
+        <span>— โครงงานเว็บแอปพลิเคชันวิเคราะห์ความเสี่ยงไฟป่าและสิ่งแวดล้อม</span>
+      </div>
+      <div class="font-mono text-[11px]">
+        Real-Time API: Open-Meteo | Map: Leaflet &amp; Esri/OSM
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet.js Script -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <!-- Main Application Logic -->
+  <script src="./app.js"></script>
+</body>
+</html>
