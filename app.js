@@ -589,30 +589,7 @@ function updateUI() {
 }
 
 // ============================================================================
-// 8. CREDITS MANAGEMENT (LOCAL STORAGE + MODAL)
-// ============================================================================
-function loadSavedCredits() {
-  try {
-    const raw = localStorage.getItem("wildflare_credits_v1");
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      state.credits = { ...state.credits, ...parsed };
-    }
-  } catch {
-    // ignore storage errors
-  }
-  renderCreditsUI();
-}
-
-function renderCreditsUI() {
-  document.getElementById("credit-dev-name").textContent = state.credits.devName;
-  document.getElementById("credit-dev-role").textContent = state.credits.devRole;
-  document.getElementById("credit-advisor-name").textContent = state.credits.advisorName;
-  document.getElementById("credit-school-name").textContent = state.credits.schoolName;
-}
-
-// ============================================================================
-// 9. STATION & COORDINATE SELECTION WORKFLOW
+// 8. STATION & COORDINATE SELECTION WORKFLOW
 // ============================================================================
 async function selectStationById(stationId) {
   const st = MONITORING_STATIONS.find((s) => s.id === stationId);
@@ -653,7 +630,7 @@ async function selectCoordinate(lat, lng, labelName, fallbackData = null, panMap
 }
 
 // ============================================================================
-// 10. EVENT LISTENERS & INITIALIZATION
+// 9. EVENT LISTENERS & INITIALIZATION
 // ============================================================================
 function attachEventListeners() {
   // Mobile Navigation Menu
@@ -798,39 +775,6 @@ function attachEventListeners() {
   formulaModal.addEventListener("click", (e) => {
     if (e.target === formulaModal) closeFormulaModal();
   });
-
-  // Credits Modal Controls
-  const creditsModal = document.getElementById("credits-modal");
-  const openCreditsModal = () => {
-    document.getElementById("input-dev-name").value = state.credits.devName;
-    document.getElementById("input-dev-role").value = state.credits.devRole;
-    document.getElementById("input-advisor-name").value = state.credits.advisorName;
-    document.getElementById("input-school-name").value = state.credits.schoolName;
-    creditsModal.classList.remove("hidden");
-    creditsModal.classList.add("flex");
-  };
-  const closeCreditsModal = () => {
-    creditsModal.classList.add("hidden");
-    creditsModal.classList.remove("flex");
-  };
-  document.getElementById("btn-edit-credits").addEventListener("click", openCreditsModal);
-  document.getElementById("btn-close-credits-modal").addEventListener("click", closeCreditsModal);
-  document.getElementById("btn-save-credits").addEventListener("click", () => {
-    state.credits.devName = document.getElementById("input-dev-name").value.trim() || "ระบุชื่อผู้จัดทำโครงงาน";
-    state.credits.devRole = document.getElementById("input-dev-role").value.trim() || "นักเรียนระดับชั้นมัธยมศึกษาตอนปลาย";
-    state.credits.advisorName = document.getElementById("input-advisor-name").value.trim() || "ระบุชื่ออาจารย์ที่ปรึกษา";
-    state.credits.schoolName = document.getElementById("input-school-name").value.trim() || "ระบุชื่อโรงเรียน / สถานศึกษา";
-    try {
-      localStorage.setItem("wildflare_credits_v1", JSON.stringify(state.credits));
-    } catch {
-      // ignore
-    }
-    renderCreditsUI();
-    closeCreditsModal();
-  });
-  creditsModal.addEventListener("click", (e) => {
-    if (e.target === creditsModal) closeCreditsModal();
-  });
 }
 
 // Initialize App on DOM Ready
@@ -838,7 +782,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (window.lucide) {
     window.lucide.createIcons();
   }
-  loadSavedCredits();
   renderPresetButtons();
   initMap();
   attachEventListeners();

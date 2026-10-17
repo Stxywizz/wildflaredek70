@@ -138,7 +138,6 @@
           <div class="text-slate-300/95 text-sm sm:text-base lg:text-lg leading-relaxed space-y-1">
             <p class="sm:whitespace-nowrap">แพลตฟอร์มคำนวณดัชนีความเสี่ยงไฟป่าเชิงวิศวกรรมสิ่งแวดล้อม (0–100%)</p>
             <p class="sm:whitespace-nowrap">ประมวลผลจากอุณหภูมิ ความชื้นสัมพัทธ์ ความเร็วลม และค่าฝุ่น PM2.5 แบบเรียลไทม์</p>
-            <p class="text-cyan-300/90 text-xs sm:text-sm font-medium">คำนวณด้วยสมการทางกายภาพโดยตรง ไม่ใช้แบบสอบถามประเมินความรู้สึก</p>
           </div>
 
           <!-- CTA Buttons -->
@@ -772,73 +771,73 @@
       </div>
     </section>
 
-    <!-- ================= 5. PROJECT CREDITS & ADVISOR SECTION (หน้าผู้จัดทำและที่ปรึกษา) ================= -->
+    <!-- ================= 5. PROJECT CREDITS & ADVISOR SECTION (ผู้จัดทำและที่ปรึกษา) ================= -->
     <section id="credits-section" class="pt-4">
       <div class="glass-card rounded-3xl p-6 sm:p-8 border border-cyan-500/25 shadow-2xl relative overflow-hidden">
         <div class="absolute -left-16 -bottom-16 w-52 h-52 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-800/80 pb-5">
-          <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-400/30 text-cyan-300 text-xs font-mono mb-2">
-              <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
-              <span>PROJECT CREDITS &amp; DEVELOPMENT TEAM</span>
-            </div>
-            <h3 class="font-display font-bold text-2xl sm:text-3xl text-white">
-              คณะผู้จัดทำและที่ปรึกษาโครงงาน
-            </h3>
-            <p class="text-xs sm:text-sm text-slate-400 mt-1">
-              โครงงานการพัฒนาเว็บแอปพลิเคชันวิเคราะห์ความเสี่ยงไฟป่าและสิ่งแวดล้อม (WILDFLARE)
-            </p>
+        <div class="mb-6 border-b border-slate-800/80 pb-5">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-400/30 text-cyan-300 text-xs font-mono mb-2">
+            <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+            <span>PROJECT CREDITS</span>
           </div>
-
-          <button
-            id="btn-edit-credits"
-            class="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-medium bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 transition-all whitespace-nowrap"
-          >
-            <i data-lucide="pen-line" class="w-3.5 h-3.5"></i>
-            <span>แก้ไขชื่อผู้จัดทำ / ที่ปรึกษา</span>
-          </button>
+          <h3 class="font-display font-bold text-2xl sm:text-3xl text-white">
+            ผู้จัดทำและที่ปรึกษาโครงงาน
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            โครงงานการพัฒนาเว็บแอปพลิเคชันวิเคราะห์ความเสี่ยงไฟป่าและสิ่งแวดล้อม (WILDFLARE)
+          </p>
         </div>
 
-        <!-- 3 Credit Cards: Developer, Advisor, School/Institution -->
+        <!-- Clean Credits Layout matching reference screenshot & responsive grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           
-          <!-- Developer Card -->
-          <div class="p-5 rounded-2xl bg-slate-900/75 border border-cyan-500/25 flex items-start gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-400/25 to-sky-500/10 border border-cyan-400/40 flex items-center justify-center shrink-0">
-              <i data-lucide="user-check" class="w-6 h-6 text-cyan-400"></i>
-            </div>
-            <div class="space-y-1">
-              <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 block">ผู้จัดทำและพัฒนาโครงงาน</span>
-              <h4 id="credit-dev-name" class="font-display font-bold text-lg text-white">ระบุชื่อผู้จัดทำโครงงาน</h4>
-              <p id="credit-dev-role" class="text-xs text-slate-300">นักเรียนระดับชั้นมัธยมศึกษาตอนปลาย</p>
-              <p class="text-[11px] text-slate-400 pt-1">ออกแบบระบบ วิเคราะห์สมการความเสี่ยง และพัฒนาส่วนติดต่อผู้ใช้</p>
-            </div>
-          </div>
-
-          <!-- Advisor Card -->
-          <div class="p-5 rounded-2xl bg-slate-900/75 border border-sky-500/25 flex items-start gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400/25 to-indigo-500/10 border border-sky-400/40 flex items-center justify-center shrink-0">
-              <i data-lucide="award" class="w-6 h-6 text-sky-400"></i>
-            </div>
-            <div class="space-y-1">
-              <span class="text-[11px] font-mono uppercase tracking-wider text-sky-400 block">ครู / อาจารย์ที่ปรึกษาโครงงาน</span>
-              <h4 id="credit-advisor-name" class="font-display font-bold text-lg text-white">ระบุชื่ออาจารย์ที่ปรึกษา</h4>
-              <p id="credit-advisor-role" class="text-xs text-slate-300">อาจารย์ที่ปรึกษาโครงงานวิทยาศาสตร์และเทคโนโลยี</p>
-              <p class="text-[11px] text-slate-400 pt-1">ให้คำแนะนำหลักการทางวิชาการและการตรวจสอบความถูกต้องของข้อมูล</p>
+          <!-- 1. ผู้จัดทำ -->
+          <div class="p-5 sm:p-6 rounded-2xl bg-slate-900/75 border border-cyan-500/25 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-cyan-400">ผู้จัดทำ</span>
+                <i data-lucide="code-2" class="w-4 h-4 text-cyan-400/70"></i>
+              </div>
+              <h4 class="font-display font-bold text-lg sm:text-xl text-white">
+                นายประพล ป้อมตรี
+              </h4>
+              <p class="text-xs sm:text-sm text-slate-400 whitespace-nowrap">
+                บทบาท: ออกแบบ UI / เขียนโปรแกรม / วิเคราะห์ข้อมูล
+              </p>
             </div>
           </div>
 
-          <!-- Institution / School Card -->
-          <div class="p-5 rounded-2xl bg-slate-900/75 border border-teal-500/25 flex items-start gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400/25 to-emerald-500/10 border border-teal-400/40 flex items-center justify-center shrink-0">
-              <i data-lucide="building-2" class="w-6 h-6 text-teal-400"></i>
+          <!-- 2. โรงเรียน -->
+          <div class="p-5 sm:p-6 rounded-2xl bg-slate-900/75 border border-teal-500/25 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-teal-400">โรงเรียน</span>
+                <i data-lucide="school" class="w-4 h-4 text-teal-400/70"></i>
+              </div>
+              <h4 class="font-display font-bold text-lg sm:text-xl text-white whitespace-nowrap">
+                โรงเรียนสวนกุหลาบวิทยาลัย รังสิต
+              </h4>
+              <p class="text-xs sm:text-sm text-slate-400">
+                ชั้นมัธยมศึกษาปีที่ 6
+              </p>
             </div>
-            <div class="space-y-1">
-              <span class="text-[11px] font-mono uppercase tracking-wider text-teal-400 block">สถานศึกษาและแหล่งข้อมูล</span>
-              <h4 id="credit-school-name" class="font-display font-bold text-lg text-white">ระบุชื่อโรงเรียน / สถานศึกษา</h4>
-              <p id="credit-school-dept" class="text-xs text-slate-300">โครงงานเพื่อยื่นแฟ้มสะสมผลงาน (Portfolio)</p>
-              <p class="text-[11px] text-slate-400 pt-1">ข้อมูลอุตุนิยมวิทยาจาก Open-Meteo API และพิกัดแผนที่จาก OpenStreetMap / Esri</p>
+          </div>
+
+          <!-- 3. ที่ปรึกษา -->
+          <div class="p-5 sm:p-6 rounded-2xl bg-slate-900/75 border border-sky-500/25 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-sky-400">ที่ปรึกษา</span>
+                <i data-lucide="award" class="w-4 h-4 text-sky-400/70"></i>
+              </div>
+              <h4 class="font-display font-bold text-lg sm:text-xl text-white">
+                นายธีรวงศ์ ปวิชพงศ์กุล
+              </h4>
+              <div class="text-xs sm:text-sm text-slate-400 space-y-0.5">
+                <p>นักศึกษาคณะวิศวกรรมศาสตร์</p>
+                <p class="sm:whitespace-nowrap">สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง</p>
+              </div>
             </div>
           </div>
 
@@ -847,46 +846,6 @@
     </section>
 
   </main>
-
-  <!-- ================= EDIT CREDITS MODAL ================= -->
-  <div id="credits-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-    <div class="glass-card rounded-3xl max-w-lg w-full p-6 sm:p-7 border border-cyan-400/30 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="font-display font-bold text-lg text-white flex items-center gap-2">
-          <i data-lucide="user-Check" class="w-5 h-5 text-cyan-400"></i>
-          <span>ตั้งค่าข้อมูลผู้จัดทำและอาจารย์ที่ปรึกษา</span>
-        </h3>
-        <button id="btn-close-credits-modal" class="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3 text-xs sm:text-sm">
-        <div>
-          <label class="block text-slate-300 mb-1">ชื่อ-นามสกุล ผู้จัดทำโครงงาน</label>
-          <input id="input-dev-name" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น นายสมชาย ใจดี" />
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">ระดับชั้น / ตำแหน่งผู้จัดทำ</label>
-          <input id="input-dev-role" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น นักเรียนชั้นมัธยมศึกษาปีที่ 6" />
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">ชื่อ-นามสกุล ครู/อาจารย์ที่ปรึกษา</label>
-          <input id="input-advisor-name" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น อาจารย์วิชัย วิทยา" />
-        </div>
-        <div>
-          <label class="block text-slate-300 mb-1">ชื่อโรงเรียน / สถานศึกษา</label>
-          <input id="input-school-name" type="text" class="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-cyan-400 outline-none" placeholder="เช่น โรงเรียน..." />
-        </div>
-      </div>
-
-      <div class="pt-2 flex justify-end gap-2">
-        <button id="btn-save-credits" class="px-6 py-2.5 rounded-full font-display font-semibold text-xs sm:text-sm text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-all">
-          บันทึกข้อมูล
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- ================= ENGINEERING FORMULA MODAL ================= -->
   <div id="formula-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-md">
